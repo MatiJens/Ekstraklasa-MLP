@@ -5,7 +5,7 @@ import pandas as pd
 def create_tensors(matches_df):
 
     # Definition of categorical and numerical feature columns and target column
-    categorical_features = ['opponent_id']
+    categorical_features = ['opponent_id', ]
     numerical_features = ['matchday', 'is_home', 'goals', 'last_results']
     target_column = 'result'
 

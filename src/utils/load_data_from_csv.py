@@ -2,7 +2,15 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-def load_data_from_csv(csv_path, club_name, season):
+def load_data_from_csv(csv_path, season):
+    """
+    Read csv_file, and filter data, remove unnecessary columns and adding new ones.
+
+    Args:
+    :param csv_path: Path to file
+    :param season:
+    :return:
+    """
 
     # Reading data as pandas dataframe and translation every column to english
     matches_df = pd.read_csv(csv_path, sep = ';')
@@ -14,74 +22,95 @@ def load_data_from_csv(csv_path, club_name, season):
     wrong_matches_mask = walkover_mask & cancelled_mask
     matches_df = matches_df[wrong_matches_mask]
 
-    # Change season column type to int
+    # Change season column type to int and date to datetime
     matches_df['season'] = matches_df['season'].str.split('/').str[0]
     matches_df['season'] = pd.to_numeric(matches_df['season'])
+    matches_df['date'] = pd.to_datetime(matches_df['date'])
 
     # Filtering season date
     season_mask = matches_df['season'] >= season
     matches_df = matches_df[season_mask]
 
-    # Filtering club name and adding new column is_home, that tells if match was in home stadium
-    club_home_mask = matches_df['home'] == club_name
-    club_away_mask = matches_df['away'] == club_name
-    club_mask = club_home_mask | club_away_mask
-    matches_df = matches_df[club_mask]
-    matches_df['is_home'] = club_home_mask.astype(int)
-
-    # Adding goals result score
-    goals = np.where(
-        matches_df['is_home'] == 1,
-        matches_df['gh'] - matches_df['ga'],
-        matches_df['ga'] - matches_df['gh']
-    )
-
-    matches_df['goals'] = goals
-
-    # Creating result masks
-    win_home_mask = (matches_df['is_home'] == 1) & (matches_df['gh'] > matches_df['ga'])
-    win_away_mask = (matches_df['is_home'] == 0) & (matches_df['ga'] > matches_df['gh'])
-    win_mask = win_home_mask | win_away_mask
-    draw_mask = matches_df['ga'] == matches_df['gh']
-
-    # Creating new column that show the result, 2 = win, 1 = draw, 0 = loss
-    conditions = [win_mask, draw_mask]
-    choices = [2, 1]
-    matches_df['result'] = np.select(conditions, choices, default=0)
-
-    # Counting results of last 5 matches
-    last_results_map = matches_df['result'].map({2 : 1, 1 : 0, 0 : -1})
-    last_results = last_results_map.rolling(window = 5, min_periods = 1).sum().shift(1).fillna(0)
-    matches_df.insert(matches_df.columns.get_loc('result'), 'last_results', last_results.astype(int))
-    #matches_df['last_results'] =
-
-    # Adding opponent as Label Encoding column it will be transformed to Embedding
-    matches_df = matches_df.reset_index(drop=True)
-
-    opponent = np.where(
-        matches_df['is_home'] == 1,
-        matches_df['away'],
-        matches_df['home']
-    )
-
-    opponent = np.char.replace(opponent.astype(str), ' ', '')
-
-    opponent_encoder = LabelEncoder()
-
-    matches_df.insert(matches_df.columns.get_loc('result'), 'opponent_id', opponent_encoder.fit_transform(opponent))
-
     # Deleting teams that play only one season in Ekstraklasa
-    season_count = matches_df.groupby('opponent_id')['season'].nunique()
+    season_count = matches_df.groupby('home')['season'].nunique()
     one_season_mask = season_count == 1
     season_count = season_count[one_season_mask]
-    delete_one_season_mask = ~matches_df['opponent_id'].isin(season_count)
+    delete_one_season_mask = ~matches_df['home'].isin(season_count)
     matches_df = matches_df[delete_one_season_mask]
 
-    matches_df = matches_df.drop(columns=['Id', 'IsCancelled', 'IsWalkover', 'hour', 'date', 'note', 'home', 'away', 'gh', 'ga', 'season'])
+    # Sort by date and reset index after deleting teams
+    matches_df = matches_df.sort_values(by='Id').reset_index(drop = True)
+
+    # Unique teams encoding with LabelEncoder it will be transformed to Embedding then
+    team_encoder = LabelEncoder()
+
+    all_teams = pd.concat([matches_df['home'], matches_df['away']]).unique()
+    unique_teams = team_encoder.fit(all_teams)
+
+    unique_teams_names = team_encoder.classes_
+
+    unique_teams_map = {}
+    for number in range(len(unique_teams_names)):
+        unique_teams_map[number] = unique_teams_names[number]
+
+    matches_df['home'] = unique_teams.transform(matches_df['home'])
+    matches_df['away'] = unique_teams.transform(matches_df['away'])
+
+    # Creating new column that shows goals balance
+    matches_df['goals'] = matches_df['gh'] - matches_df['ga']
+
+    # Creating new column that show the result, 2 = win, 1 = draw, 0 = loss
+    win_mask = matches_df['goals'] > 0
+    draw_mask = matches_df['goals'] == 0
+    conditions = [win_mask, draw_mask]
+    choices = [1, 0]
+    matches_df['result'] = np.select(conditions, choices, default=-1)
+
+    #TODO POSEGREGOWAĆ PO DRUŻYNACH I POTEM TO ROBIĆ NA UNIQUE
+
+    # Create home and away copy, adding columns that say if the match was in home,
+    # multiply away results by -1 to match them with actual team result,
+    # and change home and away columns names to same
+    matches_df_home_copy = matches_df[['Id', 'home', 'result']].copy()
+    matches_df_home_copy = matches_df_home_copy.rename(columns={'home': 'team_id'})
+    matches_df_home_copy['is_home'] = 1
+
+    matches_df_away_copy = matches_df[['Id', 'away', 'result']].copy()
+    matches_df_away_copy = matches_df_away_copy.rename(columns={'away': 'team_id'})
+    matches_df_away_copy['result'] *= -1
+    matches_df_away_copy['is_home'] = 0
+
+    # Creating one df that is sum of away and home copy
+    matches_df_copy = pd.concat([matches_df_away_copy, matches_df_home_copy]).reset_index(drop = True)
+
+    # Sorting by team_id and matchId
+    matches_df_copy =  matches_df_copy.sort_values(by = ['team_id', 'Id'])
+
+    # Rolling by result and sum to get form of every unique team
+    last_results = matches_df_copy.groupby('team_id')['result'] \
+        .rolling(window = 5, min_periods = 1). \
+        sum(). \
+        shift(1). \
+        fillna(0). \
+        astype(int). \
+        reset_index(level = 0, drop = True)
+
+    print(last_results)
+    # Sorting matches by matchId
+    matches_df_copy =  matches_df_copy.sort_values(by = 'Id')
+
+    # Creating new columns that say last_results of home and away team in matchId
+    matches_df_copy = matches_df_copy.set_index(['Id', 'is_home'])['last_results'].unstack()
+    matches_df_copy = matches_df_copy.rename(columns = {0 : 'last_results_away', 1 : 'last_results_home'})
+
+    print(matches_df_copy)
+
+    # Delete unnecessary columns
+    matches_df = matches_df.drop(columns=['IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga'])
 
     # Final reset of indexes
     matches_df = matches_df.reset_index(drop=True)
 
-    return matches_df
+    return matches_df, unique_teams_map
 
 
