@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
+
 def load_data_from_csv(csv_path, season):
     """
     Read csv_file, and filter data, remove unnecessary columns and adding new ones.
@@ -13,7 +14,7 @@ def load_data_from_csv(csv_path, season):
     """
 
     # Reading data as pandas dataframe and translation every column to english
-    matches_df = pd.read_csv(csv_path, sep = ';')
+    matches_df = pd.read_csv(csv_path, sep=';')
     matches_df = matches_df.rename(columns={'Kolejka': 'matchday'})
 
     # Deleting walkover and cancelled matches
@@ -39,7 +40,7 @@ def load_data_from_csv(csv_path, season):
     matches_df = matches_df[delete_one_season_mask]
 
     # Sort by date and reset index after deleting teams
-    matches_df = matches_df.sort_values(by='Id').reset_index(drop = True)
+    matches_df = matches_df.sort_values(by='Id').reset_index(drop=True)
 
     # Unique teams encoding with LabelEncoder it will be transformed to Embedding then
     team_encoder = LabelEncoder()
@@ -66,7 +67,7 @@ def load_data_from_csv(csv_path, season):
     choices = [1, 0]
     matches_df['result'] = np.select(conditions, choices, default=-1)
 
-    #TODO POSEGREGOWAĆ PO DRUŻYNACH I POTEM TO ROBIĆ NA UNIQUE
+    # TODO POSEGREGOWAĆ PO DRUŻYNACH I POTEM TO ROBIĆ NA UNIQUE
 
     # Create home and away copy, adding columns that say if the match was in home,
     # multiply away results by -1 to match them with actual team result,
@@ -81,36 +82,47 @@ def load_data_from_csv(csv_path, season):
     matches_df_away_copy['is_home'] = 0
 
     # Creating one df that is sum of away and home copy
-    matches_df_copy = pd.concat([matches_df_away_copy, matches_df_home_copy]).reset_index(drop = True)
+    matches_df_copy = pd.concat([matches_df_away_copy, matches_df_home_copy])
 
     # Sorting by team_id and matchId
-    matches_df_copy =  matches_df_copy.sort_values(by = ['team_id', 'Id'])
+    matches_df_copy = matches_df_copy.sort_values(by=['team_id', 'Id']).reset_index(drop=True)
 
     # Rolling by result and sum to get form of every unique team
     last_results = matches_df_copy.groupby('team_id')['result'] \
-        .rolling(window = 5, min_periods = 1). \
-        sum(). \
-        shift(1). \
-        fillna(0). \
-        astype(int). \
-        reset_index(level = 0, drop = True)
+        .rolling(window=5, min_periods=1) \
+        .sum() \
+        .shift(1) \
+        .fillna(0) \
+        .astype(int) \
+        .reset_index(level=0, drop=True)
 
-    print(last_results)
+    # Creating new data frame with last results and concating it with matches_df_copy
+    last_results_data = {'last_results': last_results}
+    last_results_df = pd.DataFrame(last_results_data)
+
+    matches_df_copy = pd.concat([matches_df_copy, last_results_df], axis=1)
+
+    # Zeroing last_results of every first match of every team (It is caused by .shift(1))
+    first_occurance_team = matches_df_copy.drop_duplicates(subset=['team_id']).index
+    matches_df_copy.loc[first_occurance_team, 'last_results'] = 0
+
     # Sorting matches by matchId
-    matches_df_copy =  matches_df_copy.sort_values(by = 'Id')
+    matches_df_copy = matches_df_copy.sort_values(by='Id')
 
     # Creating new columns that say last_results of home and away team in matchId
     matches_df_copy = matches_df_copy.set_index(['Id', 'is_home'])['last_results'].unstack()
-    matches_df_copy = matches_df_copy.rename(columns = {0 : 'last_results_away', 1 : 'last_results_home'})
+    matches_df_copy = matches_df_copy.rename(columns={0: 'last_results_away', 1: 'last_results_home'})
 
-    print(matches_df_copy)
+    # Resetting indexes of matches_df and matches_df_copy and concating them
+    matches_df_copy = matches_df_copy.reset_index(drop=True)
+    matches_df = matches_df.sort_values(by="Id").reset_index(drop=True)
+    matches_df = pd.concat([matches_df, matches_df_copy], axis=1)
 
     # Delete unnecessary columns
-    matches_df = matches_df.drop(columns=['IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga'])
+    matches_df = matches_df.drop(columns=['IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga', 'date'])
 
-    # Final reset of indexes
-    matches_df = matches_df.reset_index(drop=True)
+    # Swapping order of columns
+    swap_columns_titles = ['Id', 'matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result', 'goals']
+    matches_df = matches_df.reindex(columns=swap_columns_titles)
 
     return matches_df, unique_teams_map
-
-
