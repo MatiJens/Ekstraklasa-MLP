@@ -94,15 +94,15 @@ def data_preprocessing(csv_path, season):
         .astype(int) \
         .reset_index(level=0, drop=True)
 
-    # Creating new data frame with last results and concating it with matches_df_copy
+    # Creating new data frame with last results and concatenating it with matches_df_copy
     last_results_data = {'last_results': last_results}
     last_results_df = pd.DataFrame(last_results_data)
 
     matches_df_copy = pd.concat([matches_df_copy, last_results_df], axis=1)
 
     # Zeroing last_results of every first match of every team (It is caused by .shift(1))
-    first_occurance_team = matches_df_copy.drop_duplicates(subset=['team_id']).index
-    matches_df_copy.loc[first_occurance_team, 'last_results'] = 0
+    first_occurrence_team = matches_df_copy.drop_duplicates(subset=['team_id']).index
+    matches_df_copy.loc[first_occurrence_team, 'last_results'] = 0
 
     # Sorting matches by matchId
     matches_df_copy = matches_df_copy.sort_values(by='Id')
@@ -111,7 +111,7 @@ def data_preprocessing(csv_path, season):
     matches_df_copy = matches_df_copy.set_index(['Id', 'is_home'])['last_results'].unstack()
     matches_df_copy = matches_df_copy.rename(columns={0: 'last_results_away', 1: 'last_results_home'})
 
-    # Resetting indexes of matches_df and matches_df_copy and concating them
+    # Resetting indexes of matches_df and matches_df_copy and concatenating them
     matches_df_copy = matches_df_copy.reset_index(drop=True)
     matches_df = matches_df.sort_values(by="Id").reset_index(drop=True)
     matches_df = pd.concat([matches_df, matches_df_copy], axis=1)
