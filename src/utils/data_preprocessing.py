@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 
-def load_data_from_csv(csv_path, season):
+def data_preprocessing(csv_path, season):
     """
     Read csv_file, and filter data, remove unnecessary columns and adding new ones.
 
@@ -67,8 +67,6 @@ def load_data_from_csv(csv_path, season):
     choices = [1, 0]
     matches_df['result'] = np.select(conditions, choices, default=-1)
 
-    # TODO POSEGREGOWAĆ PO DRUŻYNACH I POTEM TO ROBIĆ NA UNIQUE
-
     # Create home and away copy, adding columns that say if the match was in home,
     # multiply away results by -1 to match them with actual team result,
     # and change home and away columns names to same
@@ -119,10 +117,10 @@ def load_data_from_csv(csv_path, season):
     matches_df = pd.concat([matches_df, matches_df_copy], axis=1)
 
     # Delete unnecessary columns
-    matches_df = matches_df.drop(columns=['IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga', 'date'])
+    matches_df = matches_df.drop(columns=['Id' ,'IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga', 'date'])
 
     # Swapping order of columns
-    swap_columns_titles = ['Id', 'matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result', 'goals']
+    swap_columns_titles = ['matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result', 'goals']
     matches_df = matches_df.reindex(columns=swap_columns_titles)
 
     return matches_df, unique_teams_map

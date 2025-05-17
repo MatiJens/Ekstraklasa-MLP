@@ -1,14 +1,13 @@
 from torch.utils.data import Dataset
 
-
 class MatchesDataset(Dataset):
-    def __init__(self, cat_features, num_features, targets):
-        self.cat_features = cat_features
-        self.num_features = num_features
-        self.targets = targets
+    def __init__(self, x_cat_tensor, x_num_tensor, y_tensor):
+        self.x_cat_tensor = x_cat_tensor
+        self.x_num_tensor = x_num_tensor
+        self.y_tensor = y_tensor
 
     def __len__(self):
-        return len(self.targets)
+        return len(self.y_tensor)
 
-    def __getitem__(self, item):
-        return self.cat_features[item], self.num_features[item], self.targets[item]
+    def __getitem__(self, idx):
+        return self.x_cat_tensor[idx], self.x_num_tensor[idx], self.y_tensor[idx]
