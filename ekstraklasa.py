@@ -62,24 +62,24 @@ def main():
         # Turning model in training mode
         model.train()
 
-        for x_cat_tensor, x_num_tensor, y_tensor in train_dataloader:
+        for x_train_cat_batch, x_train_num_batch, y_train_batch in train_dataloader:
 
             # Transfer tensor to GPU if available
-            x_cat_tensor = x_cat_tensor.to(device)
-            x_num_tensor = x_num_tensor.to(device)
-            y_tensor = y_tensor.to(device)
+            x_train_cat_batch = x_train_cat_batch.to(device)
+            x_train_num_batch = x_train_num_batch.to(device)
+            y_train_batch = y_train_batch.to(device)
 
             # Transform labels to correct format
-            result_labels = y_tensor[:, 0].long()
+            train_result_labels = y_train_batch[:, 0].long()
 
             # Zeroing gradients
             optimizer.zero_grad()
 
             # Model outputs
-            predicted_results = model(x_cat_tensor, x_num_tensor)
+            train_predicted_results = model(x_train_cat_batch, x_train_num_batch)
 
             # Calculating loss
-            loss_result_train = criterion_result(predicted_results, result_labels)
+            loss_result_train = criterion_result(train_predicted_results, train_result_labels)
 
             loss_result_train.backward()
 
@@ -100,22 +100,22 @@ def main():
     all_predicted_labels = []
 
     with torch.no_grad():
-        for x_cat_tensor, x_num_tensor, y_tensor in test_dataloader:
+        for x_test_cat_batch, x_test_num_batch, y_test_batch in test_dataloader:
 
-            x_cat_tensor = x_cat_tensor.to(device)
-            x_num_tensor = x_num_tensor.to(device)
-            y_tensor = y_tensor.to(device)
+            x_test_cat_batch = x_test_cat_batch.to(device)
+            x_test_num_batch = x_test_num_batch.to(device)
+            y_test_batch = y_test_batch.to(device)
 
-            result_labels_batch = y_tensor[:, 0].long()
+            test_result_labels = y_test_batch[:, 0].long()
 
-            test_result = model(x_cat_tensor, x_num_tensor)
+            test_result = model(x_test_cat_batch, x_test_num_batch)
 
-            result_loss_test = criterion_result(test_result, result_labels_batch)
+            result_loss_test = criterion_result(test_result, test_result_labels)
 
             _, predicted_results_test = torch.max(test_result, 1)
 
-            all_true_labels.append(result_labels_batch.cpu().numpy())
-            all_predicted_labels.append(result_labels_batch.cpu().numpy())
+            all_true_labels.append(test_result_labels.cpu().numpy())
+            all_predicted_labels.append(test_result_labels.cpu().numpy())
 
     all_true_labels = np.concatenate(all_true_labels)
     all_predicted_labels = np.concatenate(all_predicted_labels)

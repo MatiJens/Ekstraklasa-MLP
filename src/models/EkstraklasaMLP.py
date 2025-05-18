@@ -15,9 +15,7 @@ class EkstraklasaMLP(nn.Module):
 
         # Create mlp layers as Sequential
         self.mlp = nn.Sequential(
-            nn.Linear(input_size, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(input_size, 32),
             nn.ReLU(),
             nn.Linear(32, 16),
             nn.ReLU()
