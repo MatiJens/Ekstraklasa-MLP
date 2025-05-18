@@ -9,7 +9,7 @@ def count_last_results(matches_df):
     matches_df_home_copy = matches_df_home_copy.rename(columns={'home': 'team_id'})
     matches_df_home_copy['is_home'] = 1
 
-    matches_df_away_copy = matches_df[['date', 'away', 'result']].copy()
+    matches_df_away_copy = matches_df[['Id', 'date', 'away', 'result']].copy()
     matches_df_away_copy = matches_df_away_copy.rename(columns={'away': 'team_id'})
     matches_df_away_copy['result'] *= -1
     matches_df_away_copy['is_home'] = 0
