@@ -58,8 +58,8 @@ def data_preprocessing(csv_path, down_season, up_season):
     train_mask = matches_df['season'] < up_season
     test_mask = matches_df['season'] >= up_season
 
-    matches_df_train = matches_df[train_mask]
-    matches_df_test = matches_df[test_mask]
+    matches_df_train = matches_df[train_mask].copy()
+    matches_df_test = matches_df[test_mask].copy()
 
     # Creating new column that shows goals balance
     matches_df_train['goals'] = matches_df_train['gh'] - matches_df_train['ga']
