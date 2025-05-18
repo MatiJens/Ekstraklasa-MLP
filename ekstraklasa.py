@@ -28,7 +28,7 @@ def main():
     EMBEDDING_VECTOR_SIZE = 10
     BATCH_SIZE = 64
     NUM_WORKERS = 4
-    EPOCHS = 300
+    EPOCHS = 200
     LR = 0.001
 
     # Creating model
