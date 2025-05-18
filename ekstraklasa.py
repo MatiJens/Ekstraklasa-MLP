@@ -15,7 +15,7 @@ import torch.nn as nn
 def main():
     # Loading and preprocessing data
     csv_path = "data/poland_1.csv"
-    matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2015, 2022)
+    matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2013, 2022)
 
     # Creating tensors
     x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor = create_tensors(matches_df_train, matches_df_test)
@@ -25,11 +25,11 @@ def main():
     test_dataset = MatchesDataset(x_test_cat_tensor, x_test_num_tensor, y_test_tensor)
 
     # HIPERPARAMETERS
-    EMBEDDING_VECTOR_SIZE = 15
+    EMBEDDING_VECTOR_SIZE = 20
     BATCH_SIZE = 64
     NUM_WORKERS = 4
     EPOCHS = 200
-    LR = 0.003
+    LR = 0.007
 
     # Creating model
     model = EkstraklasaMLP(len(unique_opponents), EMBEDDING_VECTOR_SIZE)
