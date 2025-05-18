@@ -15,7 +15,7 @@ import torch.nn as nn
 def main():
     # Loading and preprocessing data
     csv_path = "data/poland_1.csv"
-    matches_df, unique_opponents = data_preprocessing(csv_path, 2018)
+    matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2018)
 
     # Creating tensors
     x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor = create_tensors(matches_df)
@@ -36,7 +36,6 @@ def main():
 
     # Creating criterion function: CrossEntropy for categorization and MSELoss for regression
     criterion_result = nn.CrossEntropyLoss()
-    criterion_goals = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=LR)
 
     # Parameters for DataLoaders
@@ -72,7 +71,6 @@ def main():
 
             # Transform labels to correct format
             result_labels = y_tensor[:, 0].long()
-            #goals_labels = y_tensor[:, 1].float().unsqueeze(1)
 
             # Zeroing gradients
             optimizer.zero_grad()
@@ -81,18 +79,16 @@ def main():
             predicted_results = model(x_cat_tensor, x_num_tensor)
 
             # Calculating loss
-            loss_result = criterion_result(predicted_results, result_labels)
-            #loss_goals = criterion_goals(predicted_goals, goals_labels)
-            #total_loss = loss_goals + loss_result
+            loss_result_train = criterion_result(predicted_results, result_labels)
 
-            loss_result.backward()
+            loss_result_train.backward()
 
             optimizer.step()
 
-        loss_per_epoch.append(loss_result.item())
+        loss_per_epoch.append(loss_result_train.item())
 
         if (epoch + 1) % 10 == 0:
-            print(f"Epoch {epoch + 1}/{EPOCHS} Loss: {loss_result.item()}")
+            print(f"Epoch {epoch + 1}/{EPOCHS} Loss: {loss_result_train.item()}")
 
     fig, ax = plt.subplots()
     ax.plot(loss_per_epoch)
@@ -114,7 +110,7 @@ def main():
 
             test_result = model(x_cat_tensor, x_num_tensor)
 
-            result_loss = criterion_result(test_result, result_labels_batch)
+            result_loss_test = criterion_result(test_result, result_labels_batch)
 
             _, predicted_results_test = torch.max(test_result, 1)
 
@@ -124,7 +120,7 @@ def main():
     all_true_labels = np.concatenate(all_true_labels)
     all_predicted_labels = np.concatenate(all_predicted_labels)
 
-    print(f"Loss on results test: {result_loss}")
+    print(f"Loss on results test: {result_loss_test.item()}")
 
     print("Confusion matrix:")
     cm = confusion_matrix(all_true_labels, all_predicted_labels)
