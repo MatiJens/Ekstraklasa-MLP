@@ -30,10 +30,6 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df['season'] = pd.to_numeric(matches_df['season'])
     matches_df['date'] = pd.to_datetime(matches_df['date'])
 
-    # Filtering season date
-    season_mask = matches_df['season'] >= down_season
-    matches_df = matches_df[season_mask]
-
     # Deleting teams that play only one season in Ekstraklasa
     season_count = matches_df.groupby('home')['season'].nunique()
     one_season_mask = season_count == 1
@@ -42,7 +38,7 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df = matches_df[delete_one_season_mask]
 
     # Sort by date and reset index after deleting teams
-    matches_df = matches_df.sort_values(by=['date', 'Id']).reset_index(drop=True)
+    matches_df = matches_df.sort_values(by='Id').reset_index(drop=True)
 
     # Unique teams encoding with LabelEncoder it will be transformed to Embedding then
     team_encoder = LabelEncoder()
@@ -59,21 +55,28 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df['home'] = unique_teams.transform(matches_df['home'])
     matches_df['away'] = unique_teams.transform(matches_df['away'])
 
-    # Creating new column that shows goals balance
-    matches_df['goals'] = matches_df['gh'] - matches_df['ga']
-
-    # Creating new column that show the result, 2 = win, 1 = draw, 0 = loss
-    win_mask = matches_df['goals'] > 0
-    draw_mask = matches_df['goals'] == 0
-    conditions = [win_mask, draw_mask]
-    choices = [2, 1]
-    matches_df['result'] = np.select(conditions, choices, default=0)
-
     train_mask = matches_df['season'] < up_season
     test_mask = matches_df['season'] >= up_season
 
     matches_df_train = matches_df[train_mask]
     matches_df_test = matches_df[test_mask]
+
+    # Creating new column that shows goals balance
+    matches_df_train['goals'] = matches_df_train['gh'] - matches_df_train['ga']
+    matches_df_test['goals'] = matches_df_test['gh'] - matches_df_test['ga']
+
+    # Creating new column that show the result, 2 = win, 1 = draw, 0 = loss
+    win_train_mask = matches_df_train['goals'] > 0
+    draw_train_mask = matches_df_train['goals'] == 0
+    win_test_mask = matches_df_test['goals'] > 0
+    draw_test_mask = matches_df_test['goals'] == 0
+
+    conditions_train = [win_train_mask, draw_train_mask]
+    conditions_test = [win_test_mask, draw_test_mask]
+    choices = [2, 1]
+
+    matches_df_train['result'] = np.select(conditions_train, choices, default=0)
+    matches_df_test['result'] = np.select(conditions_test, choices, default=0)
 
     last_results_train = count_last_results(matches_df_train)
     last_results_test = count_last_results(matches_df_test)
