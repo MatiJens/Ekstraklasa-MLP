@@ -35,18 +35,53 @@ shuffle_test = False
 num_workers = 2
 
 # Creating DataLoaders
-train_dataloader = DataLoader(train_dataset,
-                              batch_size,
-                              shuffle_train,
-                              num_workers)
+train_dataloader = DataLoader(dataset=train_dataset,
+                              batch_size=batch_size,
+                              shuffle=shuffle_train,
+                              num_workers=num_workers)
 
-test_dataloader = DataLoader(test_dataset,
-                              batch_size,
-                              shuffle_test,
-                              num_workers)
+test_dataloader = DataLoader(dataset=test_dataset,
+                              batch_size=batch_size,
+                              shuffle=shuffle_test,
+                              num_workers=num_workers)
 
-epochs = 20
+# If GPU is available use GPU if not use CPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+epochs = 50
 
 for epoch in range(epochs):
-
+    # Turning model in training mode
     model.train()
+
+    running_loss = 0.0
+    correct_predictions = 0
+
+    for x_cat_tensor, x_num_tensor, y_tensor in train_dataloader:
+
+        # Transfer tensor to GPU if available
+        x_cat_tensor = x_cat_tensor.to(device)
+        x_num_tensor = x_num_tensor.to(device)
+        y_tensor = y_tensor.to(device)
+
+        # Transform labels to correct format
+        result_labels = y_tensor[:, 0]#.long()
+        goals_labels = y_tensor[:, 1]#.float().unsqueeze(1)
+
+        # Zeroing gradients
+        optimizer.zero_grad()
+
+        # Model outputs
+        predicted_results, predicted_goals = model(x_cat_tensor, x_num_tensor)
+
+        # Calculating loss
+        loss_result = criterion_result(predicted_results, result_labels)
+        loss_goals = criterion_goals(predicted_goals, goals_labels)
+        total_loss = loss_goals + loss_result
+
+        total_loss.backward()
+
+        optimizer.step()
+
+    if (epoch + 1) % 20 == 0:
+        print(f"Epoch {epoch + 1}/{epochs} Loss: {total_loss.item()}")
