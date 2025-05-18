@@ -118,7 +118,7 @@ def data_preprocessing(csv_path, season):
     matches_df = pd.concat([matches_df, matches_df_copy], axis=1)
 
     # Delete unnecessary columns
-    matches_df = matches_df.drop(columns=['Id' ,'IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga', 'date'])
+    matches_df = matches_df.drop(columns=['Id' ,'IsCancelled', 'IsWalkover', 'season', 'hour', 'note', 'gh', 'ga', 'date', 'goals'])
 
     # Swapping order of columns
     swap_columns_titles = ['matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result', 'goals']

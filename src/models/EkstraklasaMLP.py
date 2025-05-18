@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class EkstraklasaMLP(nn.Module):
-    def __init__(self, num_unique_team, embedding_vector_size, num_numerical_features, num_result_classes, output_goals_dim):
+    def __init__(self, num_unique_team, embedding_vector_size):
 
         super(EkstraklasaMLP, self).__init__()
 
@@ -11,7 +11,7 @@ class EkstraklasaMLP(nn.Module):
         self.away_embedding = nn.Embedding(num_unique_team, embedding_vector_size)
 
         # Calculating number of input neurons
-        input_size = embedding_vector_size + embedding_vector_size + num_numerical_features
+        input_size = embedding_vector_size + embedding_vector_size + 3
 
         # Create mlp layers as Sequential
         self.mlp = nn.Sequential(
@@ -23,15 +23,14 @@ class EkstraklasaMLP(nn.Module):
             nn.ReLU()
         )
 
-        # Output layers
-        self.fc_result = nn.Linear(16, num_result_classes)
-        #self.fc_goals = nn.Linear(16, output_goals_dim)
+        # Output layer
+        self.fc_result = nn.Linear(16, 3)
 
     def forward(self, cat_inputs_batch, num_inputs_batch):
 
-        # Split home and away inputs and transforming them to correct form using squeeze
-        home_batch = cat_inputs_batch[:, 0].squeeze()
-        away_batch = cat_inputs_batch[:, 1].squeeze()
+        # Split home and away inputs
+        home_batch = cat_inputs_batch[:, 0]
+        away_batch = cat_inputs_batch[:, 1]
 
         # Creating embedding vectors
         home_embedded = self.home_embedding(home_batch)
@@ -43,8 +42,7 @@ class EkstraklasaMLP(nn.Module):
         mlp_output = self.mlp(input_features)
 
         result_output = self.fc_result(mlp_output)
-        #goals_output = self.fc_goals(mlp_output)
 
-        return result_output#, goals_output
+        return result_output
 
 
