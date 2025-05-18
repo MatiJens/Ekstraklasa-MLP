@@ -15,16 +15,14 @@ class EkstraklasaMLP(nn.Module):
 
         # Create mlp layers as Sequential
         self.mlp = nn.Sequential(
-            nn.Linear(input_size, 128),
+            nn.Linear(input_size, 64),
             nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(32, 16),
             nn.ReLU()
         )
 
         # Output layer
-        self.fc_result = nn.Linear(32, 3)
+        self.fc_result = nn.Linear(16, 3)
 
     def forward(self, cat_inputs_batch, num_inputs_batch):
 

@@ -25,7 +25,7 @@ def main():
     test_dataset = MatchesDataset(x_test_cat_tensor, x_test_num_tensor, y_test_tensor)
 
     # HIPERPARAMETERS
-    EMBEDDING_VECTOR_SIZE = 30
+    EMBEDDING_VECTOR_SIZE = 15
     BATCH_SIZE = 32
     NUM_WORKERS = 2
     EPOCHS = 150
