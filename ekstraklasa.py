@@ -115,7 +115,7 @@ def main():
             _, predicted_results_test = torch.max(test_result, 1)
 
             all_true_labels.append(test_result_labels.cpu().numpy())
-            all_predicted_labels.append(test_result_labels.cpu().numpy())
+            all_predicted_labels.append(predicted_results_test.cpu().numpy())
 
     all_true_labels = np.concatenate(all_true_labels)
     all_predicted_labels = np.concatenate(all_predicted_labels)
