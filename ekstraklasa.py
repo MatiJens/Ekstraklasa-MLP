@@ -15,7 +15,7 @@ import torch.nn as nn
 def main():
     # Loading and preprocessing data
     csv_path = "data/poland_1.csv"
-    matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2018)
+    matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2018, 2023)
 
     # Creating tensors
     x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor = create_tensors(matches_df)
