@@ -42,7 +42,7 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df = matches_df[delete_one_season_mask]
 
     # Sort by date and reset index after deleting teams
-    matches_df = matches_df.sort_values(by='date').reset_index(drop=True)
+    matches_df = matches_df.sort_values(by=['date', 'Id']).reset_index(drop=True)
 
     # Unique teams encoding with LabelEncoder it will be transformed to Embedding then
     team_encoder = LabelEncoder()
