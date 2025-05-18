@@ -42,7 +42,7 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df = matches_df[delete_one_season_mask]
 
     # Sort by date and reset index after deleting teams
-    matches_df = matches_df.sort_values(by='Id').reset_index(drop=True)
+    matches_df = matches_df.sort_values(by='date').reset_index(drop=True)
 
     # Unique teams encoding with LabelEncoder it will be transformed to Embedding then
     team_encoder = LabelEncoder()
@@ -78,10 +78,10 @@ def data_preprocessing(csv_path, down_season, up_season):
     last_results_train = count_last_results(matches_df_train)
     last_results_test = count_last_results(matches_df_test)
 
-    matches_df_train = matches_df_train.sort_values(by="Id").reset_index(drop=True)
+    matches_df_train = matches_df_train.sort_values(by="date").reset_index(drop=True)
     matches_df_train = pd.concat([matches_df_train, last_results_train], axis=1)
 
-    matches_df_test = matches_df_test.sort_values(by="Id").reset_index(drop=True)
+    matches_df_test = matches_df_test.sort_values(by="date").reset_index(drop=True)
     matches_df_test = pd.concat([matches_df_test, last_results_test], axis=1)
 
     # Delete unnecessary columns
