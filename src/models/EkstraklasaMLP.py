@@ -17,7 +17,7 @@ class EkstraklasaMLP(nn.Module):
         self.mlp = nn.Sequential(
             nn.Linear(input_size, 64),
             nn.ReLU(),
-            nn.Linear(32, 16),
+            nn.Linear(64, 16),
             nn.ReLU()
         )
 
