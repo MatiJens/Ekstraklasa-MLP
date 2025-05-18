@@ -25,7 +25,7 @@ def create_tensors(data):
     x = data[categorical_features + numerical_features]
     y = data[target_column]
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
 
     x_train_cat_tensor = torch.LongTensor(x_train[categorical_features].values)
     x_train_num_tensor = torch.FloatTensor(x_train[numerical_features].values)

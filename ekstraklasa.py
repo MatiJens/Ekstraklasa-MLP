@@ -23,12 +23,12 @@ def main():
     test_dataset = MatchesDataset(x_test_cat_tensor, x_test_num_tensor, y_test_tensor)
 
     # Creating model
-    model = EkstraklasaMLP(len(unique_opponents), 5, 3, 3, 1)
+    model = EkstraklasaMLP(len(unique_opponents), 10, 3, 3, 1)
 
     # Creating criterion function: CrossEntropy for categorization and MSELoss for regression
     criterion_result = nn.CrossEntropyLoss()
     criterion_goals = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.002)
+    optimizer = optim.Adam(model.parameters(), lr=0.05)
 
     # Parameters for DataLoaders
     batch_size = 32
@@ -50,7 +50,7 @@ def main():
     # If GPU is available use GPU if not use CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    epochs = 400
+    epochs = 300
     loss_per_epoch = []
 
     for epoch in range(epochs):
