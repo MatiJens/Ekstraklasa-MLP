@@ -28,7 +28,7 @@ def main():
     # Creating criterion function: CrossEntropy for categorization and MSELoss for regression
     criterion_result = nn.CrossEntropyLoss()
     criterion_goals = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.005)
+    optimizer = optim.Adam(model.parameters(), lr=0.002)
 
     # Parameters for DataLoaders
     batch_size = 32
@@ -50,7 +50,7 @@ def main():
     # If GPU is available use GPU if not use CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    epochs = 200
+    epochs = 400
     loss_per_epoch = []
 
     for epoch in range(epochs):
@@ -110,16 +110,16 @@ def main():
             result_loss = criterion_result(test_result, result_labels)
             #goals_loss = criterion_goals(test_goals, goals_labels)
 
-            _, predicted_results_test = torch.max(test_result, 1)
-            correct_results = (predicted_results_test == result_labels).sum().item()
+        _, predicted_results_test = torch.max(test_result, 1)
+        correct_results = (predicted_results_test == result_labels).sum().item()
 
-            total_prediction = result_labels.size(0)
+        total_prediction = result_labels.size(0)
 
-            accuracy_results = correct_results / total_prediction
+        accuracy_results = correct_results / total_prediction
 
-            print(f"Loss on results test: {result_loss}")
-            #print(f"MSE Loss on results test: {goals_loss}")
-            print(f"Results accuracy: {accuracy_results * 100:.2f}")
+        print(f"Loss on results test: {result_loss}")
+        #print(f"MSE Loss on results test: {goals_loss}")
+        print(f"Results accuracy: {accuracy_results * 100:.2f}")
 
 
 if __name__ == "__main__":
