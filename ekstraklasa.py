@@ -25,11 +25,11 @@ def main():
     test_dataset = MatchesDataset(x_test_cat_tensor, x_test_num_tensor, y_test_tensor)
 
     # HIPERPARAMETERS
-    EMBEDDING_VECTOR_SIZE = 30
+    EMBEDDING_VECTOR_SIZE = 10
     BATCH_SIZE = 64
     NUM_WORKERS = 4
-    EPOCHS = 400
-    LR = 0.01
+    EPOCHS = 200
+    LR = 0.005
 
     # Creating model
     model = EkstraklasaMLP(len(unique_opponents), EMBEDDING_VECTOR_SIZE)
