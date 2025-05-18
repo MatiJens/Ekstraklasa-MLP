@@ -26,7 +26,7 @@ def main():
 
     # HIPERPARAMETERS
     EMBEDDING_VECTOR_SIZE = 10
-    BATCH_SIZE = 32
+    BATCH_SIZE = 64
     NUM_WORKERS = 2
     EPOCHS = 100
     LR = 0.001
