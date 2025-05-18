@@ -89,7 +89,7 @@ def data_preprocessing(csv_path, down_season, up_season):
     matches_df_test = matches_df_test.drop(columns=['Id', 'season', 'IsCancelled', 'IsWalkover', 'hour', 'note', 'gh', 'ga', 'date', 'goals'])
 
     # Swapping order of columns
-    swap_columns_titles = ['matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result', 'goals']
+    swap_columns_titles = ['matchday', 'home', 'away', 'last_results_home', 'last_results_away', 'result']
     matches_df_train = matches_df_train.reindex(columns=swap_columns_titles)
     matches_df_test = matches_df_test.reindex(columns=swap_columns_titles)
 
