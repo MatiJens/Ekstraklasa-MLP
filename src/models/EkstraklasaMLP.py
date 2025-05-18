@@ -19,12 +19,12 @@ class EkstraklasaMLP(nn.Module):
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(32, 16),
+            nn.Linear(64, 32),
             nn.ReLU()
         )
 
         # Output layer
-        self.fc_result = nn.Linear(16, 3)
+        self.fc_result = nn.Linear(32, 3)
 
     def forward(self, cat_inputs_batch, num_inputs_batch):
 
