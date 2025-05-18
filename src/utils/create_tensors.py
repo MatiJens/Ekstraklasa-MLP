@@ -22,11 +22,11 @@ def create_tensors(data):
     x_test_num_scaled = scaler.transform(x_test[numerical_features])
 
     x_train_cat_tensor = torch.LongTensor(x_train[categorical_features].values)
-    x_train_num_tensor = torch.FloatTensor(x_train_num_scaled.values)
+    x_train_num_tensor = torch.FloatTensor(x_train_num_scaled)
     y_train_tensor = torch.LongTensor(y_train.values)
 
     x_test_cat_tensor = torch.LongTensor(x_test[categorical_features].values)
-    x_test_num_tensor = torch.FloatTensor(x_test_num_scaled.values)
+    x_test_num_tensor = torch.FloatTensor(x_test_num_scaled)
     y_test_tensor = torch.LongTensor(y_test.values)
 
     return x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor
