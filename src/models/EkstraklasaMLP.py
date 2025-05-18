@@ -15,17 +15,17 @@ class EkstraklasaMLP(nn.Module):
 
         # Create mlp layers as Sequential
         self.mlp = nn.Sequential(
-            nn.Linear(input_size, 64),
+            nn.Linear(input_size, 32),
             nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
+            #nn.Linear(64, 32),
+            #nn.ReLU(),
             nn.Linear(32, 16),
             nn.ReLU()
         )
 
         # Output layers
         self.fc_result = nn.Linear(16, num_result_classes)
-        self.fc_goals = nn.Linear(16, output_goals_dim)
+        #self.fc_goals = nn.Linear(16, output_goals_dim)
 
     def forward(self, cat_inputs_batch, num_inputs_batch):
 
@@ -43,8 +43,8 @@ class EkstraklasaMLP(nn.Module):
         mlp_output = self.mlp(input_features)
 
         result_output = self.fc_result(mlp_output)
-        goals_output = self.fc_goals(mlp_output)
+        #goals_output = self.fc_goals(mlp_output)
 
-        return result_output, goals_output
+        return result_output#, goals_output
 
 

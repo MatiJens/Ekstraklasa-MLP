@@ -64,13 +64,14 @@ def data_preprocessing(csv_path, season):
     win_mask = matches_df['goals'] > 0
     draw_mask = matches_df['goals'] == 0
     conditions = [win_mask, draw_mask]
-    choices = [1, 0]
-    matches_df['result'] = np.select(conditions, choices, default=-1)
+    choices = [2, 1]
+    matches_df['result'] = np.select(conditions, choices, default=0)
 
     # Create home and away copy, adding columns that say if the match was in home,
     # multiply away results by -1 to match them with actual team result,
     # and change home and away columns names to same
     matches_df_home_copy = matches_df[['Id', 'home', 'result']].copy()
+    matches_df_home_copy['result'] = matches_df_home_copy['result'].map({2: 1, 1: 0, 0: -1})
     matches_df_home_copy = matches_df_home_copy.rename(columns={'home': 'team_id'})
     matches_df_home_copy['is_home'] = 1
 

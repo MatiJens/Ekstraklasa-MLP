@@ -19,7 +19,7 @@ def create_tensors(data):
     # Definition of categorical and numerical feature columns and target column
     categorical_features = ['home', 'away']
     numerical_features = ['matchday', 'last_results_home', 'last_results_away']
-    target_column = ['result', 'goals']
+    target_column = ['result']
 
     # Creating train and test tensors
     x = data[categorical_features + numerical_features]
