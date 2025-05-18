@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 
-def create_tensors(test_data, train_data):
+def create_tensors(train_data, test_data):
     # Definition of categorical and numerical feature columns and target column
     categorical_features = ['home', 'away']
     numerical_features = ['matchday', 'last_results_home', 'last_results_away']

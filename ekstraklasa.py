@@ -18,7 +18,7 @@ def main():
     matches_df_train, matches_df_test, unique_opponents = data_preprocessing(csv_path, 2018, 2023)
 
     # Creating tensors
-    x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor = create_tensors(matches_df)
+    x_train_cat_tensor, x_train_num_tensor, y_train_tensor, x_test_cat_tensor, x_test_num_tensor, y_test_tensor = create_tensors(matches_df_train, matches_df_test)
 
     # Creating Datasets
     train_dataset = MatchesDataset(x_train_cat_tensor, x_train_num_tensor, y_train_tensor)
